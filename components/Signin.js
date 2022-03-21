@@ -79,7 +79,7 @@ function Signin({ providers }) {
         setLoading(false);
       } else {
         await setDoc(doc(db, "user", session?.user?.uid), userdata);
-        setForm(true);
+        setForm(false);
         userpassword.current.value = "";
         setLoading(false);
         localStorage.setItem("login", JSON.stringify(1));

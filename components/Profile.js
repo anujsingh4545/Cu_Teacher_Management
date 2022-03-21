@@ -185,7 +185,7 @@ function Profile({ uid }) {
             {/*  */}
 
             <div className=" w-[25%] md:w-[20%] flex justify-center items-center">
-              <img src="/profile.jpeg" alt="" className=" h-36 md:h-40 m-2 rounded-full" />
+              <img src={session?.user?.image} alt="" className=" h-36 md:h-40 m-2 rounded-full" />
             </div>
 
             <div className="flex items-center justify-start flex-col w-[75%] md:w-[80%]">
