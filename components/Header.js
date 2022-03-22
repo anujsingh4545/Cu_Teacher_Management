@@ -85,7 +85,7 @@ function Header({ show, uid }) {
               <p className="ml-4 text-[1.5rem]  font-semibold italic text-[#ad5b42] hidden sm:inline ">sign in </p>
             )}
 
-            <LogoutIcon className="ml-3  mr-3 h-8 cursor-pointer text-gray-200 " onClick={logOut} />
+            <LogoutIcon className="ml-6  mr-3 h-8 cursor-pointer text-gray-200 " onClick={logOut} />
           </div>
         </section>
 

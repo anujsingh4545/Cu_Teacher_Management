@@ -4,17 +4,21 @@ import { Triangle } from "react-loader-spinner";
 
 import { useSession } from "next-auth/react";
 import { db } from "../firebase";
-import { deleteDoc, doc, getDoc } from "firebase/firestore";
+import { deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useRecoilState } from "recoil";
 import { checkForm } from "../atom/checkForm";
 import { checkAccept } from "../atom/CheckAccept";
+import { isBrowser } from "@firebase/util";
+import { useRouter } from "next/router";
 
 function Greet() {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
+  const [loader, setLoader] = useState(true);
   const [not, setNot] = useState(true);
   const [check, setCheck] = useRecoilState(checkAccept);
   const [form, setForm] = useRecoilState(checkForm);
+  const router = useRouter();
 
   const fillForm = async () => {
     await deleteDoc(doc(db, "teachers", session?.user?.uid));
@@ -34,7 +38,9 @@ function Greet() {
       if (docSnap.exists()) {
         if (docSnap.data().verified === true) {
           setLoading(false);
+          router.push("/absentee");
         }
+
         if (docSnap.data().verified === "decline") {
           setNot(false);
         }
@@ -49,7 +55,7 @@ function Greet() {
   };
 
   useEffect(() => {
-    checkVerified();
+    return checkVerified();
   }, [db, session]);
 
   return (
@@ -68,6 +74,10 @@ function Greet() {
                 <div className=" w-[100%] max-w-7xl flex items-center justify-center mt-10 m-auto">
                   <Triangle color="#00BFFF" height={80} width={80} />
                 </div>
+
+                <button className=" mt-20 rounded-lg bg-purple-900 px-16 sm:px-20 py-3 sm:mr-5 text-[1.4rem] text-slate-200 outline-none ml-5" onClick={checkVerified}>
+                  Check Verification
+                </button>
               </>
             )
           ) : (
