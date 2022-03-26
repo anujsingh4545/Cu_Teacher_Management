@@ -8,21 +8,24 @@ import moment from "moment";
 
 function Leavers({ id, username, userImg, userID, absent, replace, time, from, to, date }) {
   const { data: session } = useSession();
+
   const d = new Date();
 
-  //   Deleting data after day is complete
+  console.log(date);
 
-  let times = moment(time?.toDate());
+  let times = moment(date);
+  console.log(times._d.getMonth() + 1 === d.getMonth() + 1 && times._d.getDate() < d.getDate() && times._d.getFullYear() === d.getFullYear());
 
-  if (times._d.getMonth() === d.getMonth()) {
-    if (times._d.getDate() !== d.getDate()) {
-      deleteDoc(doc(db, "absentee", id));
-    }
-  } else {
+  if (times._d.getMonth() + 1 === d.getMonth() + 1 && times._d.getDate() < d.getDate() && times._d.getFullYear() === d.getFullYear()) {
     deleteDoc(doc(db, "absentee", id));
   }
 
-  //
+  if (times._d.getMonth() < d.getMonth()) {
+    deleteDoc(doc(db, "absentee", id));
+  }
+  if (times._d.getFullYear() < d.getFullYear()) {
+    deleteDoc(doc(db, "absentee", id));
+  }
 
   const deleteItem = async () => {
     await deleteDoc(doc(db, "absentee", id));

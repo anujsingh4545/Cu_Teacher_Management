@@ -13,6 +13,11 @@ function Userlist({ UID, name, email, phone, score, profile }) {
 
   const deleteAdmin = async () => {
     await deleteDoc(doc(db, "teachers", UID));
+    const docRef = doc(db, "admin", UID);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      await deleteDoc(doc(db, "admin", UID));
+    }
   };
 
   return (

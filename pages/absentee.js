@@ -1,4 +1,4 @@
-import { addDoc, collection, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc } from "firebase/firestore";
+import { addDoc, collection, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, updateDoc } from "firebase/firestore";
 import emailjs from "@emailjs/browser";
 import { getProviders, useSession } from "next-auth/react";
 import React, { useEffect, useRef, useState } from "react";
@@ -24,6 +24,7 @@ function absentee({ providers }) {
   let absentee = useRef(null);
   let replacer = useRef(null);
   const day = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  const times = ["09:40 - 10:20", "10:30 - 11:10", "11:20 - 12:00", "12:10 - 12:50", "13:10 - 13:50", "14:00 - 14:40", "14:50 - 15:30", "15:40 - 16:20"];
 
   const [move, setMove] = useState(false);
   const [form, setForm] = useRecoilState(checkForm);
@@ -125,20 +126,74 @@ function absentee({ providers }) {
   function Recommend() {
     let result = [],
       i = 0;
+    absent.map((teachers) => {
+      Replacers.push({ teacher: teachers.data().Replace, from: teachers.data().from, to: teachers.data().to });
+      leavers.push({ teacher: teachers.data().Absent, from: teachers.data().from, to: teachers.data().to });
+    });
+
     return (
       <section className="max-w-[100%]  mt-14">
-        <p className="text-yellow-600 font-semibold font-serif text-[1.8rem] tracking-wider ">Recommendations : </p>
+        <p className="text-yellow-600  font-semibold font-serif text-[1.8rem] tracking-wider ">Recommendations : </p>
         {teacher.map((datas) => {
           let days = new Date(setTime);
           let findDay = datas.data()[`${day[days.getDay() - 1]}`];
           for (let i = 0; i < findDay.length; i++) {
             let spliter = findDay[i].split(" ");
             if (spliter[0] === firstTime && spliter[2] === secondTime) {
-              result.push(datas.data().Teachername);
+              let index = -1;
+              for (let i = 0; i < times.length; ++i) {
+                if (times[i] === `${firstTime} - ${secondTime}`) {
+                  index = i;
+                  break;
+                }
+              }
+
+              let correct = false;
+              if (leavers.length <= 0 && Replacers.length <= 0) {
+                correct = true;
+              }
+              for (let i = 0; i < leavers.length && Replacers.length; i++) {
+                if (leavers[i].from === firstTime && leavers[i].to === secondTime && leavers[i].teacher === datas.data().Teachername) {
+                  correct = false;
+
+                  break;
+                } else if (Replacers[i].from === firstTime && Replacers[i].to === secondTime && Replacers[i].teacher === datas.data().Teachername) {
+                  correct = false;
+
+                  break;
+                } else {
+                  correct = true;
+                }
+              }
+
+              if (result !== -1 && correct === true) {
+                if (index === 0) {
+                  for (let i = 0; i < findDay.length; i++) {
+                    if (times[index + 1] === findDay[i]) {
+                      result.push(`${datas.data().Teachername} ➡️`);
+                    }
+                  }
+                } else if (index == times.length - 1) {
+                  for (let i = 0; i < findDay.length; i++) {
+                    if (times[index - 1] === findDay[i]) {
+                      result.push(`⬅️ ${datas.data().Teachername} `);
+                    }
+                  }
+                } else {
+                  for (let i = 0; i < findDay.length; i++) {
+                    if (times[index + 1] === findDay[i]) {
+                      result.push(`${datas.data().Teachername} ➡️`);
+                    } else if (times[index - 1] === findDay[i]) {
+                      result.push(`⬅️ ${datas.data().Teachername} `);
+                    }
+                  }
+                }
+              }
             }
           }
         })}
-        <section className=" mt-2 w-[100%] flex flex-wrap justify-between ">
+
+        <section className=" mt-2 w-[100%]  max-h-60 overflow-y-scroll scrollbar-hide flex flex-wrap justify-between ">
           {result.map((datas) => {
             return (
               <p key={++i} className="px-2 py-3 my-2 bg-slate-800 text-gray-300 tracking-wider font-semibold  text-[1.4rem] truncate rounded-xl w-[48%] sm:w-[30%] text-center ">
@@ -166,6 +221,8 @@ function absentee({ providers }) {
   function submitFirst() {
     if (loading) return;
 
+    Replacers = [];
+    leavers = [];
     absent.map((teachers) => {
       Replacers.push({ teacher: teachers.data().Replace, from: teachers.data().from, to: teachers.data().to });
       leavers.push({ teacher: teachers.data().Absent, from: teachers.data().from, to: teachers.data().to });
@@ -186,6 +243,7 @@ function absentee({ providers }) {
             for (let i = 0; i < leavers.length; i++) {
               if (leavers[i].from === from.current.value && leavers[i].to === to.current.value && leavers[i].teacher === datas.data().Teachername) {
                 correct = false;
+
                 break;
               } else {
                 correct = true;
@@ -194,7 +252,7 @@ function absentee({ providers }) {
 
             if (correct === true) {
               return (
-                <option key={datas.id} value={datas.data().Teachername} className="bg-white text-[1rem] sm:text-[1.5rem]">
+                <option key={datas.id} value={`${datas.data().Teachername} - ${datas.data().email} - ${datas.data().userId}`} data-emails={datas.data().email} className="bg-white text-[1rem] sm:text-[1.5rem]">
                   {datas.data().Teachername}
                 </option>
               );
@@ -220,9 +278,11 @@ function absentee({ providers }) {
                   correct = true;
                 }
                 for (let i = 0; i < Replacers.length; i++) {
-                  if (Replacers[i].from === from.current.value && Replacers[i].to === to.current.value && Replacers[i].teacher === datas.data().Teachername) {
+                  if (Replacers[i].from == from.current.value && Replacers[i].to == to.current.value && Replacers[i].teacher == datas.data().Teachername) {
                     correct = false;
-
+                    break;
+                  } else if (leavers[i].from === from.current.value && leavers[i].to === to.current.value && leavers[i].teacher === datas.data().Teachername) {
+                    correct = false;
                     break;
                   } else {
                     correct = true;
@@ -233,7 +293,7 @@ function absentee({ providers }) {
 
             if (correct === true) {
               return (
-                <option key={datas.id} value={datas.data().Teachername} className="bg-white text-[1rem] sm:text-[1.5rem]">
+                <option key={datas.id} value={`${datas.data().Teachername} - ${datas.data().email} - ${datas.data().userId}`} data-emails={datas.data().email} className="bg-white text-[1rem] sm:text-[1.5rem]">
                   {datas.data().Teachername}
                 </option>
               );
@@ -259,29 +319,58 @@ function absentee({ providers }) {
     if (absentee.current.value === "Pick a teacher" || replacer.current.value === "Pick a teacher" || absentee.current.value === replacer.current.value) {
       alert("Please choose teachers correctly ...!");
     } else {
+      let spliter1 = absentee.current.value.split(" - ");
+      let absenter = spliter1[0];
+      let absenterMail = spliter1[1];
+      let absenterUID = spliter1[2];
+
+      let spliter2 = replacer.current.value.split(" - ");
+      let replacers = spliter2[0];
+      let replacerMail = spliter2[1];
+      let replacerUID = spliter2[2];
+
       const userdata = {
         username: session.user.username,
         profileImg: session.user.image,
         timeStamp: serverTimestamp(),
         userId: session.user.uid,
-        Absent: absentee.current.value,
-        Replace: replacer.current.value,
+        Absent: absenter,
+        Replace: replacers,
         from: firstTime,
         to: secondTime,
         date: setTime,
       };
+
+      const docRef = doc(db, "teachers", absenterUID);
+      let AbsenterScore = 0;
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        AbsenterScore = docSnap.data().score;
+      }
+      await updateDoc(docRef, {
+        score: AbsenterScore - 10,
+      });
+
+      const docRef1 = doc(db, "teachers", replacerUID);
+      let ReplacerScore = 0;
+      const docSnap1 = await getDoc(docRef1);
+      if (docSnap1.exists()) {
+        ReplacerScore = docSnap1.data().score;
+      }
+      await updateDoc(docRef1, {
+        score: ReplacerScore + 10,
+      });
+
       await addDoc(collection(db, "absentee"), userdata);
 
-      // console.log(setTime, firstTime, secondTime);
-
-      // emailjs.sendForm("anuj", "template_i0vdx5k", { absentee: absentee.current.value, names: replacer.current.value, date: setTime, time: firstTime - secondTime }, "80bpaghXcoMxa7-uz").then(
-      //   (result) => {
-      //     console.log(result.text);
-      //   },
-      //   (error) => {
-      //     console.log(error.text);
-      //   }
-      // );
+      emailjs.send("anuj", "template_i0vdx5k", { absentee: `${absenter}`, names: `${replacers}`, absent: `${absenter}`, dates: `${setTime}`, times: `${firstTime} - ${secondTime}`, receiver: `${replacerMail}`, senders: `${session?.user?.email}` }, "80bpaghXcoMxa7-uz").then(
+        (result) => {
+          console.log(result.text);
+        },
+        (error) => {
+          console.log(error.text);
+        }
+      );
 
       absentee.current.value = "Pick a teacher";
       replacer.current.value = "Pick a teacher";
