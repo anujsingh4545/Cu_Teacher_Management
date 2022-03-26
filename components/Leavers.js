@@ -11,10 +11,7 @@ function Leavers({ id, username, userImg, userID, absent, replace, time, from, t
 
   const d = new Date();
 
-  console.log(date);
-
   let times = moment(date);
-  console.log(times._d.getMonth() + 1 === d.getMonth() + 1 && times._d.getDate() < d.getDate() && times._d.getFullYear() === d.getFullYear());
 
   if (times._d.getMonth() + 1 === d.getMonth() + 1 && times._d.getDate() < d.getDate() && times._d.getFullYear() === d.getFullYear()) {
     deleteDoc(doc(db, "absentee", id));

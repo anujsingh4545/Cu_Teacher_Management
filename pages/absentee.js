@@ -1,5 +1,6 @@
 import { addDoc, collection, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, updateDoc } from "firebase/firestore";
 import emailjs from "@emailjs/browser";
+import moment from "moment";
 import { getProviders, useSession } from "next-auth/react";
 import React, { useEffect, useRef, useState } from "react";
 import { db } from "../firebase";
@@ -221,6 +222,9 @@ function absentee({ providers }) {
   function submitFirst() {
     if (loading) return;
 
+    const d = new Date();
+    let times = moment(dates.current.value);
+
     Replacers = [];
     leavers = [];
     absent.map((teachers) => {
@@ -229,7 +233,7 @@ function absentee({ providers }) {
     });
 
     setLoading(true);
-    if (dates.current.value.length > 0 && from.current.value.length > 0 && to.current.value.length > 0 && from.current.value < to.current.value) {
+    if (dates.current.value.length > 0 && from.current.value.length > 0 && to.current.value.length > 0 && from.current.value < to.current.value && times._d.getMonth() >= d.getMonth() && times._d.getFullYear() >= d.getFullYear() && times._d.getDate() >= d.getDate()) {
       setOptions1(
         <select ref={absentee} className="flex-1 bg-slate-200  text-[1.5rem] rounded-md py-2   text-black outline-none ">
           <option value="Pick a teacher" className="text-black text-[1rem] sm:text-[1.5rem]">
@@ -363,14 +367,14 @@ function absentee({ providers }) {
 
       await addDoc(collection(db, "absentee"), userdata);
 
-      emailjs.send("anuj", "template_i0vdx5k", { absentee: `${absenter}`, names: `${replacers}`, absent: `${absenter}`, dates: `${setTime}`, times: `${firstTime} - ${secondTime}`, receiver: `${replacerMail}`, senders: `${session?.user?.email}` }, "80bpaghXcoMxa7-uz").then(
-        (result) => {
-          console.log(result.text);
-        },
-        (error) => {
-          console.log(error.text);
-        }
-      );
+      // emailjs.send("anuj", "template_i0vdx5k", { absentee: `${absenter}`, names: `${replacers}`, absent: `${absenter}`, dates: `${setTime}`, times: `${firstTime} - ${secondTime}`, receiver: `${replacerMail}`, senders: `${session?.user?.email}` }, "80bpaghXcoMxa7-uz").then(
+      //   (result) => {
+      //     console.log(result.text);
+      //   },
+      //   (error) => {
+      //     console.log(error.text);
+      //   }
+      // );
 
       absentee.current.value = "Pick a teacher";
       replacer.current.value = "Pick a teacher";
