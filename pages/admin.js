@@ -19,6 +19,9 @@ import Dataform from "../components/Dataform";
 import Greet from "../components/Greet";
 import { AdminCheck } from "../atom/AdminCheck";
 import { useRouter } from "next/router";
+import { ShowModal } from "../atom/ShowModal";
+import { InformationCircleIcon } from "@heroicons/react/solid";
+import Info from "../components/Info";
 
 function admin({ providers }) {
   const { data: session } = useSession();
@@ -31,6 +34,7 @@ function admin({ providers }) {
   const [onprofile, setOnProfile] = useRecoilState(ShowProfile);
   const [admins, setAdmins] = useRecoilState(AdminCheck);
   const router = useRouter();
+  const [modal, setModal] = useRecoilState(ShowModal);
 
   useEffect(() => {
     checkAdmin();
@@ -176,6 +180,17 @@ function admin({ providers }) {
           <p className="w-[100%] text-slate-300 tracking-wider font-semibold font-serif text-[2rem] text-center ">Access not allowed ⚠️</p>
         </div>
       )}
+
+      <div
+        className=" fixed bottom-10 right-6 md:right-10  rounded-full bg-slate-100 cursor-pointer p-0"
+        onClick={() => {
+          setModal(true);
+        }}
+      >
+        <InformationCircleIcon className=" text-blue-600 h-16 md:h-20 rounded-full m-0  " />
+      </div>
+
+      <Info />
     </>
   );
 }

@@ -16,9 +16,13 @@ import { checkForm } from "../atom/checkForm";
 import { checkAccept } from "../atom/CheckAccept";
 import { ShowProfile } from "../atom/ShowProfile";
 import { Triangle } from "react-loader-spinner";
+import Info from "../components/Info";
+import { InformationCircleIcon } from "@heroicons/react/solid";
+import { ShowModal } from "../atom/ShowModal";
 
 function absentee({ providers }) {
   const { data: session } = useSession();
+  const [modal, setModal] = useRecoilState(ShowModal);
   let dates = useRef(null);
   let from = useRef(null);
   let to = useRef(null);
@@ -233,86 +237,186 @@ function absentee({ providers }) {
     });
 
     setLoading(true);
-    if (dates.current.value.length > 0 && from.current.value.length > 0 && to.current.value.length > 0 && from.current.value < to.current.value && times._d.getMonth() >= d.getMonth() && times._d.getFullYear() >= d.getFullYear() && times._d.getDate() >= d.getDate()) {
-      setOptions1(
-        <select ref={absentee} className="flex-1 bg-slate-200  text-[1.5rem] rounded-md py-2   text-black outline-none ">
-          <option value="Pick a teacher" className="text-black text-[1rem] sm:text-[1.5rem]">
-            Pick a teacher ...
-          </option>
-          {teacher?.map((datas) => {
-            let correct = false;
-            if (leavers.length <= 0) {
-              correct = true;
-            }
-            for (let i = 0; i < leavers.length; i++) {
-              if (leavers[i].from === from.current.value && leavers[i].to === to.current.value && leavers[i].teacher === datas.data().Teachername) {
-                correct = false;
 
-                break;
-              } else {
-                correct = true;
-              }
-            }
-
-            if (correct === true) {
-              return (
-                <option key={datas.id} value={`${datas.data().Teachername} - ${datas.data().email} - ${datas.data().userId}`} data-emails={datas.data().email} className="bg-white text-[1rem] sm:text-[1.5rem]">
-                  {datas.data().Teachername}
-                </option>
-              );
-            }
-          })}
-        </select>
-      );
-
-      setOptions2(
-        <select ref={replacer} className="flex-1 bg-slate-200  text-[1.5rem] rounded-md py-2   text-black outline-none ">
-          <option value="Pick a teacher" className="text-black text-[1rem] sm:text-[1.5rem]">
-            Pick a teacher ...
-          </option>
-          {teacher?.map((datas) => {
-            let correct = false;
-            let days = new Date(dates.current.value);
-            let findDay = datas.data()[`${day[days.getDay() - 1]}`];
-
-            for (let i = 0; i < findDay.length; i++) {
-              let spliter = findDay[i].split(" ");
-              if (spliter[0] === from.current.value && spliter[2] === to.current.value) {
+    if (times._d.getFullYear() >= d.getFullYear()) {
+      if (times._d.getMonth() > d.getMonth()) {
+        if (dates.current.value.length > 0 && from.current.value.length > 0 && to.current.value.length > 0 && from.current.value < to.current.value) {
+          setOptions1(
+            <select ref={absentee} className="flex-1 bg-slate-200  text-[1.5rem] rounded-md py-2   text-black outline-none ">
+              <option value="Pick a teacher" className="text-black text-[1rem] sm:text-[1.5rem]">
+                Pick a teacher ...
+              </option>
+              {teacher?.map((datas) => {
+                let correct = false;
                 if (leavers.length <= 0) {
                   correct = true;
                 }
-                for (let i = 0; i < Replacers.length; i++) {
-                  if (Replacers[i].from == from.current.value && Replacers[i].to == to.current.value && Replacers[i].teacher == datas.data().Teachername) {
+                for (let i = 0; i < leavers.length; i++) {
+                  if (leavers[i].from === from.current.value && leavers[i].to === to.current.value && leavers[i].teacher === datas.data().Teachername) {
                     correct = false;
-                    break;
-                  } else if (leavers[i].from === from.current.value && leavers[i].to === to.current.value && leavers[i].teacher === datas.data().Teachername) {
-                    correct = false;
+
                     break;
                   } else {
                     correct = true;
                   }
                 }
-              }
-            }
 
-            if (correct === true) {
-              return (
-                <option key={datas.id} value={`${datas.data().Teachername} - ${datas.data().email} - ${datas.data().userId}`} data-emails={datas.data().email} className="bg-white text-[1rem] sm:text-[1.5rem]">
-                  {datas.data().Teachername}
+                if (correct === true) {
+                  return (
+                    <option key={datas.id} value={`${datas.data().Teachername} - ${datas.data().email} - ${datas.data().userId}`} data-emails={datas.data().email} className="bg-white text-[1rem] sm:text-[1.5rem]">
+                      {datas.data().Teachername}
+                    </option>
+                  );
+                }
+              })}
+            </select>
+          );
+
+          setOptions2(
+            <select ref={replacer} className="flex-1 bg-slate-200  text-[1.5rem] rounded-md py-2   text-black outline-none ">
+              <option value="Pick a teacher" className="text-black text-[1rem] sm:text-[1.5rem]">
+                Pick a teacher ...
+              </option>
+              {teacher?.map((datas) => {
+                let correct = false;
+                let days = new Date(dates.current.value);
+                let findDay = datas.data()[`${day[days.getDay() - 1]}`];
+
+                for (let i = 0; i < findDay.length; i++) {
+                  let spliter = findDay[i].split(" ");
+                  if (spliter[0] === from.current.value && spliter[2] === to.current.value) {
+                    if (leavers.length <= 0) {
+                      correct = true;
+                    }
+                    for (let i = 0; i < Replacers.length; i++) {
+                      if (Replacers[i].from == from.current.value && Replacers[i].to == to.current.value && Replacers[i].teacher == datas.data().Teachername) {
+                        correct = false;
+                        break;
+                      } else if (leavers[i].from === from.current.value && leavers[i].to === to.current.value && leavers[i].teacher === datas.data().Teachername) {
+                        correct = false;
+                        break;
+                      } else {
+                        correct = true;
+                      }
+                    }
+                  }
+                }
+
+                if (correct === true) {
+                  return (
+                    <option key={datas.id} value={`${datas.data().Teachername} - ${datas.data().email} - ${datas.data().userId}`} data-emails={datas.data().email} className="bg-white text-[1rem] sm:text-[1.5rem]">
+                      {datas.data().Teachername}
+                    </option>
+                  );
+                }
+              })}
+            </select>
+          );
+          setMove(true);
+          setFirstTime(from.current.value);
+          setSecondTime(to.current.value);
+          setSetTime(dates.current.value);
+          setLoading(false);
+        } else {
+          setLoading(false);
+          alert("Something wrong .., Please fill all details correctly ..! ⚠️4");
+        }
+      } else {
+        setLoading(false);
+        alert("Something wrong .., Please fill all details correctly ..! ⚠️2");
+      }
+
+      if (times._d.getMonth() === d.getMonth()) {
+        if (times._d.getDate() >= d.getDate()) {
+          if (dates.current.value.length > 0 && from.current.value.length > 0 && to.current.value.length > 0 && from.current.value < to.current.value) {
+            setOptions1(
+              <select ref={absentee} className="flex-1 bg-slate-200  text-[1.5rem] rounded-md py-2   text-black outline-none ">
+                <option value="Pick a teacher" className="text-black text-[1rem] sm:text-[1.5rem]">
+                  Pick a teacher ...
                 </option>
-              );
-            }
-          })}
-        </select>
-      );
-      setMove(true);
-      setFirstTime(from.current.value);
-      setSecondTime(to.current.value);
-      setSetTime(dates.current.value);
-      setLoading(false);
+                {teacher?.map((datas) => {
+                  let correct = false;
+                  if (leavers.length <= 0) {
+                    correct = true;
+                  }
+                  for (let i = 0; i < leavers.length; i++) {
+                    if (leavers[i].from === from.current.value && leavers[i].to === to.current.value && leavers[i].teacher === datas.data().Teachername) {
+                      correct = false;
+
+                      break;
+                    } else {
+                      correct = true;
+                    }
+                  }
+
+                  if (correct === true) {
+                    return (
+                      <option key={datas.id} value={`${datas.data().Teachername} - ${datas.data().email} - ${datas.data().userId}`} data-emails={datas.data().email} className="bg-white text-[1rem] sm:text-[1.5rem]">
+                        {datas.data().Teachername}
+                      </option>
+                    );
+                  }
+                })}
+              </select>
+            );
+
+            setOptions2(
+              <select ref={replacer} className="flex-1 bg-slate-200  text-[1.5rem] rounded-md py-2   text-black outline-none ">
+                <option value="Pick a teacher" className="text-black text-[1rem] sm:text-[1.5rem]">
+                  Pick a teacher ...
+                </option>
+                {teacher?.map((datas) => {
+                  let correct = false;
+                  let days = new Date(dates.current.value);
+                  let findDay = datas.data()[`${day[days.getDay() - 1]}`];
+
+                  for (let i = 0; i < findDay.length; i++) {
+                    let spliter = findDay[i].split(" ");
+                    if (spliter[0] === from.current.value && spliter[2] === to.current.value) {
+                      if (leavers.length <= 0) {
+                        correct = true;
+                      }
+                      for (let i = 0; i < Replacers.length; i++) {
+                        if (Replacers[i].from == from.current.value && Replacers[i].to == to.current.value && Replacers[i].teacher == datas.data().Teachername) {
+                          correct = false;
+                          break;
+                        } else if (leavers[i].from === from.current.value && leavers[i].to === to.current.value && leavers[i].teacher === datas.data().Teachername) {
+                          correct = false;
+                          break;
+                        } else {
+                          correct = true;
+                        }
+                      }
+                    }
+                  }
+
+                  if (correct === true) {
+                    return (
+                      <option key={datas.id} value={`${datas.data().Teachername} - ${datas.data().email} - ${datas.data().userId}`} data-emails={datas.data().email} className="bg-white text-[1rem] sm:text-[1.5rem]">
+                        {datas.data().Teachername}
+                      </option>
+                    );
+                  }
+                })}
+              </select>
+            );
+            setMove(true);
+            setFirstTime(from.current.value);
+            setSecondTime(to.current.value);
+            setSetTime(dates.current.value);
+            setLoading(false);
+          } else {
+            setLoading(false);
+            alert("Something wrong .., Please fill all details correctly ..! ⚠️4");
+          }
+        } else {
+          setLoading(false);
+          alert("Something wrong .., Please fill all details correctly ..! ⚠️1");
+        }
+      }
     } else {
       setLoading(false);
-      alert("Something wrong .., Please fill all details correctly ..! ⚠️");
+      alert("Something wrong .., Please fill all details correctly ..! ⚠️1");
     }
   }
 
@@ -367,14 +471,14 @@ function absentee({ providers }) {
 
       await addDoc(collection(db, "absentee"), userdata);
 
-      // emailjs.send("anuj", "template_i0vdx5k", { absentee: `${absenter}`, names: `${replacers}`, absent: `${absenter}`, dates: `${setTime}`, times: `${firstTime} - ${secondTime}`, receiver: `${replacerMail}`, senders: `${session?.user?.email}` }, "80bpaghXcoMxa7-uz").then(
-      //   (result) => {
-      //     console.log(result.text);
-      //   },
-      //   (error) => {
-      //     console.log(error.text);
-      //   }
-      // );
+      emailjs.send("anuj", "template_i0vdx5k", { absentee: `${absenter}`, names: `${replacers}`, absent: `${absenter}`, dates: `${setTime}`, times: `${firstTime} - ${secondTime}`, receiver: `${replacerMail}`, senders: `${session?.user?.email}` }, "80bpaghXcoMxa7-uz").then(
+        (result) => {
+          console.log(result.text);
+        },
+        (error) => {
+          console.log(error.text);
+        }
+      );
 
       absentee.current.value = "Pick a teacher";
       replacer.current.value = "Pick a teacher";
@@ -474,6 +578,17 @@ function absentee({ providers }) {
 
         {/*  */}
       </section>
+
+      <div
+        className=" fixed bottom-10 right-6 md:right-10  rounded-full bg-slate-100 cursor-pointer p-0"
+        onClick={() => {
+          setModal(true);
+        }}
+      >
+        <InformationCircleIcon className=" text-blue-600 h-16 md:h-20 rounded-full m-0  " />
+      </div>
+
+      <Info />
     </>
   );
 }

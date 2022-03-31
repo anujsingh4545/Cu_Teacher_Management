@@ -62,7 +62,7 @@ function Greet() {
     <>
       <Header show="no" />
       <div className="w-[95%] m-auto  max-w-7xl mt-40 ">
-        <img src="/waiting.svg" alt="" className="m-auto w-[80%] md:w-[60%]" />
+        <img src="/waiting.svg" alt="" className="m-auto w-[80%] md:w-[50%]" />
 
         <section className="w-[100%] items-center text-center">
           {/*  */}
@@ -75,7 +75,7 @@ function Greet() {
                   <Triangle color="#00BFFF" height={80} width={80} />
                 </div>
 
-                <button className=" mt-20 rounded-lg bg-purple-900 px-16 sm:px-20 py-3 sm:mr-5 text-[1.4rem] text-slate-200 outline-none ml-5" onClick={checkVerified}>
+                <button className=" mt-20 md:mt-14 rounded-lg bg-purple-900 px-16 sm:px-20 py-3 sm:mr-5 text-[1.4rem] text-slate-200 outline-none ml-5" onClick={checkVerified}>
                   Check Verification
                 </button>
               </>

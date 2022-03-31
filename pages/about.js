@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
-import { MailIcon } from "@heroicons/react/solid";
+import { InformationCircleIcon, MailIcon } from "@heroicons/react/solid";
 import Comment from "../components/Comment";
 import { getProviders, useSession } from "next-auth/react";
 import { useRecoilState } from "recoil";
@@ -15,6 +15,8 @@ import Greet from "../components/Greet";
 import { Triangle } from "react-loader-spinner";
 import { ShowProfile } from "../atom/ShowProfile";
 import Profile from "../components/Profile";
+import Info from "../components/Info";
+import { ShowModal } from "../atom/ShowModal";
 
 function about({ providers }) {
   const { data: session } = useSession();
@@ -23,6 +25,7 @@ function about({ providers }) {
   const [loading, setLoading] = useState(false);
   const [check, setCheck] = useRecoilState(checkAccept);
   const [onprofile, setOnProfile] = useRecoilState(ShowProfile);
+  const [modal, setModal] = useRecoilState(ShowModal);
 
   useEffect(async () => {
     let leadsFromLocalStorage = JSON.parse(localStorage.getItem("login"));
@@ -170,6 +173,16 @@ function about({ providers }) {
         </section>
       </section>
       <Comment />
+
+      <div
+        className=" fixed bottom-10 right-6 md:right-10  rounded-full bg-slate-100 cursor-pointer p-0"
+        onClick={() => {
+          setModal(true);
+        }}
+      >
+        <InformationCircleIcon className=" text-blue-600 h-16 md:h-20 rounded-full m-0  " />
+      </div>
+      <Info />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { loginUser } from "../atom/loginUser";
 import Homesearch from "../components/Homesearch";
 import { Triangle } from "react-loader-spinner";
+import { InformationCircleIcon } from "@heroicons/react/solid";
 
 import { db } from "../firebase";
 import { checkAccept } from "../atom/CheckAccept";
@@ -17,6 +18,8 @@ import Greet from "../components/Greet";
 import Profile from "../components/Profile";
 import { ShowProfile } from "../atom/ShowProfile";
 import { AdminCheck } from "../atom/AdminCheck";
+import Info from "../components/Info";
+import { ShowModal } from "../atom/ShowModal";
 
 export default function Home({ providers }) {
   const { data: session } = useSession();
@@ -26,6 +29,7 @@ export default function Home({ providers }) {
   const [check, setCheck] = useRecoilState(checkAccept);
   const [onprofile, setOnProfile] = useRecoilState(ShowProfile);
   const [admins, setAdmins] = useRecoilState(AdminCheck);
+  const [modal, setModal] = useRecoilState(ShowModal);
 
   useEffect(() => {
     let leadsFromLocalStorage = JSON.parse(localStorage.getItem("login"));
@@ -115,6 +119,17 @@ export default function Home({ providers }) {
           <p className="w-[100%] text-slate-300 tracking-wider font-semibold font-serif text-[2rem] text-center ">Access not allowed ⚠️</p>
         </div>
       )}
+
+      <div
+        className=" fixed bottom-10 right-6 md:right-10  rounded-full bg-slate-100 cursor-pointer p-0"
+        onClick={() => {
+          setModal(true);
+        }}
+      >
+        <InformationCircleIcon className=" text-blue-600 h-16 md:h-20 rounded-full m-0  " />
+      </div>
+
+      <Info />
 
       {/*  */}
     </div>
