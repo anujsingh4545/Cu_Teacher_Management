@@ -150,10 +150,16 @@ function Profile({ uid }) {
   };
 
   const deleteAccount = async () => {
-    await deleteDoc(doc(db, "teachers", uid));
-    await deleteDoc(doc(db, "admin", uid));
-    setOnProfile(false);
-    setForm(false);
+    let conf = confirm("Are you sure you want to delete your account ? ");
+
+    if (conf === true) {
+      setLoader(true);
+      await deleteDoc(doc(db, "teachers", uid));
+      await deleteDoc(doc(db, "admin", uid));
+      setOnProfile(false);
+      setForm(false);
+      setLoader(false);
+    }
   };
 
   if (loader) {

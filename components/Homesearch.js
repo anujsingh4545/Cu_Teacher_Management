@@ -1,9 +1,12 @@
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 import { db } from "../firebase";
 import Detail from "./Detail";
 import { Triangle } from "react-loader-spinner";
 import Comment from "../components/Comment";
+import { useRecoilState } from "recoil";
+import { storeAbsent } from "../atom/StoreAbsent";
+import { storeReplace } from "../atom/StoreReplace";
 
 function Homesearch() {
   let day = useRef(null);
@@ -11,8 +14,23 @@ function Homesearch() {
   const [teacher, setTeacher] = useState([]);
   const [loading, setLoading] = useState(false);
   const [faculty, setFaculty] = useState([]);
+
+  const [absent, setAbsent] = useRecoilState(storeAbsent);
+  const [replace, setReplace] = useRecoilState(storeReplace);
   let index = 0;
   let count = 0;
+
+  useEffect(async () => {
+    setAbsent([]);
+    setReplace([]);
+    const unsubscribe = await onSnapshot(query(collection(db, "absentee"), orderBy("timeStamp", "desc")), (snapshot) => {
+      snapshot.docs.map((check) => {
+        setAbsent((data) => [...data, { Absent: check.data().Absent, date: check.data().date }]);
+        setReplace((data) => [...data, { Replace: check.data().Replace, date: check.data().date }]);
+      });
+    });
+    return unsubscribe;
+  }, [db]);
 
   const searchData = async () => {
     if (loading) return;
