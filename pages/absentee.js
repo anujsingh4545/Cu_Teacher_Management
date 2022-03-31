@@ -372,7 +372,7 @@ function absentee({ providers }) {
 
       await addDoc(collection(db, "absentee"), userdata);
 
-      emailjs.send("anuj", "template_i0vdx5k", { absentee: `${absenter}`, names: `${replacers}`, absent: `${absenter}`, dates: `${setTime}`, times: `${firstTime} - ${secondTime}`, receiver: `${replacerMail}`, senders: `${session?.user?.email}` }, "80bpaghXcoMxa7-uz").then(
+      emailjs.send("service_i864vc3", "template_6evbtve", { absentee: `${absenter}`, names: `${replacers}`, absent: `${absenter}`, dates: `${setTime}`, times: `${firstTime} - ${secondTime}`, receiver: `${replacerMail}`, senders: `${session?.user?.email}` }, "YhqKWKGrbZ4SjeZEX").then(
         (result) => {
           console.log(result.text);
         },
