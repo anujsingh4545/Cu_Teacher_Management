@@ -20,16 +20,27 @@ import { ShowProfile } from "../atom/ShowProfile";
 import { AdminCheck } from "../atom/AdminCheck";
 import Info from "../components/Info";
 import { ShowModal } from "../atom/ShowModal";
+import { ShowUserProfile } from "../atom/ShowUserProfile";
 
 export default function Home({ providers }) {
   const { data: session } = useSession();
+
+  const [sessionStore, setSessionstore] = useState(0);
   const [form, setForm] = useRecoilState(checkForm);
   const [login, setLogin] = useRecoilState(loginUser);
   const [loading, setLoading] = useState(false);
   const [check, setCheck] = useRecoilState(checkAccept);
   const [onprofile, setOnProfile] = useRecoilState(ShowProfile);
+  const [onuserprofile, setOnuserProfile] = useRecoilState(ShowUserProfile);
   const [admins, setAdmins] = useRecoilState(AdminCheck);
   const [modal, setModal] = useRecoilState(ShowModal);
+
+  if (sessionStore === 0) {
+    if (session) {
+      setSessionstore(1);
+    }
+  } else {
+  }
 
   useEffect(() => {
     let leadsFromLocalStorage = JSON.parse(localStorage.getItem("login"));
@@ -58,7 +69,6 @@ export default function Home({ providers }) {
 
         setForm(true);
         setLoading(false);
-        //
       } else {
         setForm(false);
         setLoading(false);
@@ -84,7 +94,7 @@ export default function Home({ providers }) {
 
   useEffect(() => {
     checkData();
-  }, [db, session]);
+  }, [sessionStore]);
 
   if (loading) {
     return (
@@ -93,6 +103,7 @@ export default function Home({ providers }) {
       </div>
     );
   }
+
   if (!session) return <Signin providers={providers} />;
   if (login === 0) return <Signin providers={providers} />;
   if (form === false) {

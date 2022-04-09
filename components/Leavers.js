@@ -1,15 +1,30 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { SwitchHorizontalIcon, TrashIcon } from "@heroicons/react/outline";
 import { useSession } from "next-auth/react";
 import { async } from "@firebase/util";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase";
 import moment from "moment";
+import { useRecoilState } from "recoil";
+import { ShowUserProfile } from "../atom/ShowUserProfile";
+import { UidGuest } from "../atom/UidGuest";
 
-function Leavers({ id, username, userImg, userID, absent, replace, time, from, to, date }) {
+function Leavers({ id, username, userImg, userID, absent, replace, time, from, to, date, absenteruid, replaceruid }) {
   const { data: session } = useSession();
+  const [onprofile, setOnProfile] = useRecoilState(ShowUserProfile);
+  const [uidgest, setuidguest] = useRecoilState(UidGuest);
 
   const d = new Date();
+
+  function runabsentee() {
+    setuidguest(absenteruid);
+    setOnProfile(true);
+  }
+
+  function runreplacer() {
+    setuidguest(replaceruid);
+    setOnProfile(true);
+  }
 
   let times = moment(date);
 
@@ -45,14 +60,18 @@ function Leavers({ id, username, userImg, userID, absent, replace, time, from, t
       </section>
 
       <section className="my-5 flex w-[100%] items-center sm:px-20">
-        <p className="w-[40%] truncate   text-center  font-serif text-[1.3rem] font-bold tracking-wider text-gray-300 sm:text-[2rem]  ">{absent}</p>
+        <p onClick={runabsentee} className="w-[40%] truncate  cursor-pointer  text-center  font-serif text-[1.3rem] font-bold tracking-wider text-gray-300 sm:text-[2rem]  ">
+          {absent}
+        </p>
         <div className="w-[20%] flex items-center flex-col">
           <p className="text-center text-[1.3rem] sm:text-[1.6irem] font-semibold font-serif italic flex text-orange-600   w-[100%] justify-center ">{date}</p>
           <p className="text-center text-[1rem] sm:text-[1.2rem] font-semibold font-serif italic flex text-orange-700   w-[100%] justify-center ">
             {from} - {to}
           </p>
         </div>
-        <p className="w-[40%] truncate  text-center  font-serif text-[1.3rem] font-bold tracking-wider text-gray-300 sm:text-[2rem]">{replace}</p>
+        <p onClick={runreplacer} className="w-[40%] truncate  cursor-pointer text-center  font-serif text-[1.3rem] font-bold tracking-wider text-gray-300 sm:text-[2rem]">
+          {replace}
+        </p>
       </section>
 
       {}

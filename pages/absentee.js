@@ -1,6 +1,4 @@
 import { addDoc, collection, onSnapshot, serverTimestamp, query, orderBy, doc, getDoc, updateDoc } from "firebase/firestore";
-import emailjs from "@emailjs/browser";
-import moment from "moment";
 import { getProviders, useSession } from "next-auth/react";
 import React, { useEffect, useRef, useState } from "react";
 import { db } from "../firebase";
@@ -19,22 +17,38 @@ import { Triangle } from "react-loader-spinner";
 import Info from "../components/Info";
 import { InformationCircleIcon } from "@heroicons/react/solid";
 import { ShowModal } from "../atom/ShowModal";
+import { ShowUserProfile } from "../atom/ShowUserProfile";
+import UserProfile from "../components/Userprofile";
+import { UidGuest } from "../atom/UidGuest";
+import { MoveReplacer } from "../atom/MoveReplacer";
+import { From } from "../atom/From";
+import { To } from "../atom/To";
+import { MoverName } from "../atom/MoverName";
 
 function absentee({ providers }) {
   const { data: session } = useSession();
   const [modal, setModal] = useRecoilState(ShowModal);
   let dates = useRef(null);
-  let from = useRef(null);
-  let to = useRef(null);
+
+  const [from, setFrom] = useState("09:40");
+  const [to, setTo] = useState("10:20");
   let absentee = useRef(null);
   let replacer = useRef(null);
   const day = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
   const times = ["09:40 - 10:20", "10:30 - 11:10", "11:20 - 12:00", "12:10 - 12:50", "13:10 - 13:50", "14:00 - 14:40", "14:50 - 15:30", "15:40 - 16:20"];
 
+  const [uidgest, setuidguest] = useRecoilState(UidGuest);
   const [move, setMove] = useState(false);
   const [form, setForm] = useRecoilState(checkForm);
   const [check, setCheck] = useRecoilState(checkAccept);
   const [onprofile, setOnProfile] = useRecoilState(ShowProfile);
+  const [onGuestprofile, setOnGuestProfile] = useRecoilState(ShowUserProfile);
+  const [sessionStore, setSessionstore] = useState(0);
+  const [movereplacer, setMoveReplacer] = useRecoilState(MoveReplacer);
+  const [moverfrom, setMoverFrom] = useRecoilState(From);
+  const [moverto, setMoverTo] = useRecoilState(To);
+  const [movername, setMoverName] = useRecoilState(MoverName);
+
   const [firstTime, setFirstTime] = useState("");
   const [secondTime, setSecondTime] = useState("");
   const [setTime, setSetTime] = useState("");
@@ -47,6 +61,13 @@ function absentee({ providers }) {
   let leavers = [];
   let Replacers = [];
   const [login, setLogin] = useRecoilState(loginUser);
+
+  if (sessionStore === 0) {
+    if (session) {
+      setSessionstore(1);
+    }
+  } else {
+  }
 
   useEffect(() => {
     let leadsFromLocalStorage = JSON.parse(localStorage.getItem("login"));
@@ -69,6 +90,16 @@ function absentee({ providers }) {
     });
     return unsubscribe;
   }, [db]);
+
+  //  if replacer is passed from home getting things done for him
+
+  if (from === moverfrom && to === moverto) {
+  } else {
+    if (movereplacer) {
+      setFrom(moverfrom);
+      setTo(moverto);
+    }
+  }
 
   const checkData = async () => {
     //
@@ -106,7 +137,7 @@ function absentee({ providers }) {
 
   useEffect(() => {
     checkData();
-  }, [db, session]);
+  }, [sessionStore]);
 
   if (loader) {
     return (
@@ -132,8 +163,8 @@ function absentee({ providers }) {
     let result = [],
       i = 0;
     absent.map((teachers) => {
-      Replacers.push({ teacher: teachers.data().Replace, from: teachers.data().from, to: teachers.data().to });
-      leavers.push({ teacher: teachers.data().Absent, from: teachers.data().from, to: teachers.data().to });
+      Replacers.push({ teacher: teachers.data().Replace, from: teachers.data().from, to: teachers.data().to, date: teachers.data().date });
+      leavers.push({ teacher: teachers.data().Absent, from: teachers.data().from, to: teachers.data().to, date: teachers.data().date });
     });
 
     return (
@@ -158,13 +189,12 @@ function absentee({ providers }) {
                 correct = true;
               }
               for (let i = 0; i < leavers.length && Replacers.length; i++) {
-                if (leavers[i].from === firstTime && leavers[i].to === secondTime && leavers[i].teacher === datas.data().Teachername) {
+                if (leavers[i].from === firstTime && leavers[i].to === secondTime && leavers[i].teacher === datas.data().Teachername && leavers[i].date === setTime) {
                   correct = false;
 
                   break;
-                } else if (Replacers[i].from === firstTime && Replacers[i].to === secondTime && Replacers[i].teacher === datas.data().Teachername) {
+                } else if (Replacers[i].from === firstTime && Replacers[i].to === secondTime && Replacers[i].teacher === datas.data().Teachername && Replacers[i].date === setTime) {
                   correct = false;
-
                   break;
                 } else {
                   correct = true;
@@ -213,14 +243,14 @@ function absentee({ providers }) {
 
   function clearContent() {
     dates.current.value = "";
-    from.current.value = "";
-    to.current.value = "";
+    setFrom("09:0");
+    setTo("10:20");
   }
 
   function clearFirst() {
     dates.current.value = "";
-    from.current.value = "";
-    to.current.value = "";
+    setFrom("09:0");
+    setTo("10:20");
   }
 
   function submitFirst() {
@@ -232,13 +262,12 @@ function absentee({ providers }) {
     Replacers = [];
     leavers = [];
     absent.map((teachers) => {
-      Replacers.push({ teacher: teachers.data().Replace, from: teachers.data().from, to: teachers.data().to });
-      leavers.push({ teacher: teachers.data().Absent, from: teachers.data().from, to: teachers.data().to });
+      Replacers.push({ teacher: teachers.data().Replace, from: teachers.data().from, to: teachers.data().to, date: teachers.data().date });
+      leavers.push({ teacher: teachers.data().Absent, from: teachers.data().from, to: teachers.data().to, date: teachers.data().date });
     });
 
     setLoading(true);
-
-    if (dates.current.value.length > 0 && from.current.value.length > 0 && to.current.value.length > 0 && from.current.value < to.current.value && times >= d) {
+    if (dates.current.value.length > 0 && from.length > 0 && to.length > 0 && from < to && times.setHours(0, 0, 0, 0) >= d.setHours(0, 0, 0, 0)) {
       setOptions1(
         <select ref={absentee} className="flex-1 bg-slate-200  text-[1.5rem] rounded-md py-2   text-black outline-none ">
           <option value="Pick a teacher" className="text-black text-[1rem] sm:text-[1.5rem]">
@@ -250,7 +279,7 @@ function absentee({ providers }) {
               correct = true;
             }
             for (let i = 0; i < leavers.length; i++) {
-              if (leavers[i].from === from.current.value && leavers[i].to === to.current.value && leavers[i].teacher === datas.data().Teachername) {
+              if (leavers[i].from === from && leavers[i].to === to && leavers[i].teacher === datas.data().Teachername && leavers[i].date === dates.current.value) {
                 correct = false;
 
                 break;
@@ -282,15 +311,15 @@ function absentee({ providers }) {
 
             for (let i = 0; i < findDay.length; i++) {
               let spliter = findDay[i].split(" ");
-              if (spliter[0] === from.current.value && spliter[2] === to.current.value) {
+              if (spliter[0] === from && spliter[2] === to) {
                 if (leavers.length <= 0) {
                   correct = true;
                 }
                 for (let i = 0; i < Replacers.length; i++) {
-                  if (Replacers[i].from == from.current.value && Replacers[i].to == to.current.value && Replacers[i].teacher == datas.data().Teachername) {
+                  if (Replacers[i].from == from && Replacers[i].to == to && Replacers[i].teacher == datas.data().Teachername && Replacers[i].date === dates.current.value) {
                     correct = false;
                     break;
-                  } else if (leavers[i].from === from.current.value && leavers[i].to === to.current.value && leavers[i].teacher === datas.data().Teachername) {
+                  } else if (leavers[i].from === from && leavers[i].to === to && leavers[i].teacher === datas.data().Teachername && leavers[i].date === dates.current.value) {
                     correct = false;
                     break;
                   } else {
@@ -311,8 +340,8 @@ function absentee({ providers }) {
         </select>
       );
       setMove(true);
-      setFirstTime(from.current.value);
-      setSecondTime(to.current.value);
+      setFirstTime(from);
+      setSecondTime(to);
       setSetTime(dates.current.value);
       setLoading(false);
     } else {
@@ -348,6 +377,16 @@ function absentee({ providers }) {
         from: firstTime,
         to: secondTime,
         date: setTime,
+        absenterUID: absenterUID,
+        replacerUID: replacerUID,
+      };
+
+      const pushuserData = {
+        Absent: absenter,
+        Replace: replacers,
+        from: firstTime,
+        to: secondTime,
+        date: setTime,
       };
 
       const docRef = doc(db, "teachers", absenterUID);
@@ -371,15 +410,17 @@ function absentee({ providers }) {
       });
 
       await addDoc(collection(db, "absentee"), userdata);
+      await addDoc(collection(db, "teachers", absenterUID, "absent"), pushuserData);
+      await addDoc(collection(db, "teachers", replacerUID, "replace"), pushuserData);
 
-      emailjs.send("service_i864vc3", "template_6evbtve", { absentee: `${absenter}`, names: `${replacers}`, absent: `${absenter}`, dates: `${setTime}`, times: `${firstTime} - ${secondTime}`, receiver: `${replacerMail}`, senders: `${session?.user?.email}` }, "YhqKWKGrbZ4SjeZEX").then(
-        (result) => {
-          console.log(result.text);
-        },
-        (error) => {
-          console.log(error.text);
-        }
-      );
+      // emailjs.send("service_i864vc3", "template_6evbtve", { absentee: `${absenter}`, names: `${replacers}`, absent: `${absenter}`, dates: `${setTime}`, times: `${firstTime} - ${secondTime}`, receiver: `${replacerMail}`, senders: `${session?.user?.email}` }, "YhqKWKGrbZ4SjeZEX").then(
+      //   (result) => {
+      //     console.log(result.text);
+      //   },
+      //   (error) => {
+      //     console.log(error.text);
+      //   }
+      // );
 
       absentee.current.value = "Pick a teacher";
       replacer.current.value = "Pick a teacher";
@@ -407,12 +448,76 @@ function absentee({ providers }) {
 
               <div className="w-[100%] flex md:w-fit  items-center mt-6 md:mt-0">
                 <p className="text-[1.5rem] font-serif font-semibold text-slate-200 mr-5 w-[28%] md:w-fit ">From : </p>
-                <input type="time" ref={from} className="bg-slate-200  flex-1  px-5 md:px-2 py-2 rounded-md text-[1.5rem] md:w-[15rem] outline-none   " />
+                <select
+                  type="time"
+                  value={from}
+                  className="bg-slate-200  flex-1  px-5 md:px-2 py-2 rounded-md text-[1.5rem] md:w-[15rem] outline-none "
+                  onChange={(e) => {
+                    setFrom(e.target.value);
+                  }}
+                >
+                  <option value="09:40" className="bg-black text-white text-[1rem] lg:text-[1.5rem] ">
+                    09:40
+                  </option>
+                  <option value="10:30" className="bg-black text-white  text-[1rem] lg:text-[1.5rem] ">
+                    10:30
+                  </option>
+                  <option value="11:20" className="bg-black text-white   text-[1rem] lg:text-[1.5rem] ">
+                    11:20
+                  </option>
+                  <option value="12:10" className="bg-black text-white   text-[1rem] lg:text-[1.5rem] ">
+                    12:10
+                  </option>
+                  <option value="13:10" className="bg-black text-white   text-[1rem] lg:text-[1.5rem] ">
+                    13:10
+                  </option>
+                  <option value="14:00" className="bg-black text-white   text-[1rem] lg:text-[1.5rem] ">
+                    14:00
+                  </option>
+                  <option value="14:50" className="bg-black text-white   text-[1rem] lg:text-[1.5rem] ">
+                    14:50
+                  </option>
+                  <option value="15:40" className="bg-black text-white   text-[1rem] lg:text-[1.5rem] ">
+                    15:40
+                  </option>
+                </select>
               </div>
 
               <div className="w-[100%] flex md:w-fit  items-center mt-6 md:mt-0 ">
                 <p className="text-[1.5rem] font-serif font-semibold text-slate-200 mr-5 w-[28%] md:w-fit ">To : </p>
-                <input type="time" ref={to} className="bg-slate-200  flex-1  px-5 md:px-2 py-2 rounded-md text-[1.5rem] md:w-[15rem] outline-none " />
+                <select
+                  type="time"
+                  value={to}
+                  className="bg-slate-200  flex-1  px-5 md:px-2 py-2 rounded-md text-[1.5rem] md:w-[15rem] outline-none "
+                  onChange={(e) => {
+                    setTo(e.target.value);
+                  }}
+                >
+                  <option value="10:20" className="bg-black text-white text-[1rem] lg:text-[1.5rem] ">
+                    10:20
+                  </option>
+                  <option value="11:10" className="bg-black text-white  text-[1rem] lg:text-[1.5rem] ">
+                    11:10
+                  </option>
+                  <option value="12:00" className="bg-black text-white   text-[1rem] lg:text-[1.5rem] ">
+                    12:00
+                  </option>
+                  <option value="12:50" className="bg-black text-white   text-[1rem] lg:text-[1.5rem] ">
+                    12:50
+                  </option>
+                  <option value="13:50" className="bg-black text-white   text-[1rem] lg:text-[1.5rem] ">
+                    13:50
+                  </option>
+                  <option value="14:40" className="bg-black text-white   text-[1rem] lg:text-[1.5rem] ">
+                    14:40
+                  </option>
+                  <option value="15:30" className="bg-black text-white   text-[1rem] lg:text-[1.5rem] ">
+                    15:30
+                  </option>
+                  <option value="16:20" className="bg-black text-white   text-[1rem] lg:text-[1.5rem] ">
+                    16:20
+                  </option>
+                </select>
               </div>
             </section>
             <div className=" flex w-[100%] items-center justify-end  flex-row  mt-8 mb-5   ">
@@ -473,7 +578,7 @@ function absentee({ providers }) {
 
         <section className="mt-16 h-fit  w-[100%] ">
           {absent.map((post) => (
-            <Leavers key={post.id} id={post.id} username={post.data().username} userImg={post.data().profileImg} userID={post.data().userId} absent={post.data().Absent} replace={post.data().Replace} time={post.data().timeStamp} from={post.data().from} to={post.data().to} date={post.data().date} />
+            <Leavers key={post.id} id={post.id} username={post.data().username} userImg={post.data().profileImg} userID={post.data().userId} absent={post.data().Absent} replace={post.data().Replace} time={post.data().timeStamp} from={post.data().from} to={post.data().to} date={post.data().date} absenteruid={post.data().absenterUID} replaceruid={post.data().replacerUID} />
           ))}
         </section>
 
@@ -490,6 +595,8 @@ function absentee({ providers }) {
       </div>
 
       <Info />
+
+      {onGuestprofile && <UserProfile uid={uidgest} />}
     </>
   );
 }

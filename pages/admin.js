@@ -22,6 +22,9 @@ import { useRouter } from "next/router";
 import { ShowModal } from "../atom/ShowModal";
 import { InformationCircleIcon } from "@heroicons/react/solid";
 import Info from "../components/Info";
+import { ShowUserProfile } from "../atom/ShowUserProfile";
+import { UidGuest } from "../atom/UidGuest";
+import UserProfile from "../components/Userprofile";
 
 function admin({ providers }) {
   const { data: session } = useSession();
@@ -35,11 +38,16 @@ function admin({ providers }) {
   const [admins, setAdmins] = useRecoilState(AdminCheck);
   const router = useRouter();
   const [modal, setModal] = useRecoilState(ShowModal);
+  const [onGuestprofile, setOnGuestProfile] = useRecoilState(ShowUserProfile);
+  const [uidgest, setuidguest] = useRecoilState(UidGuest);
+  const [sessionStore, setSessionstore] = useState(0);
 
-  useEffect(() => {
-    checkAdmin();
-    checkData();
-  }, [db, session]);
+  if (sessionStore === 0) {
+    if (session) {
+      setSessionstore(1);
+    }
+  } else {
+  }
 
   useEffect(async () => {
     const unsubscribe = await onSnapshot(collection(db, "requests"), (snapshot) => {
@@ -52,6 +60,7 @@ function admin({ providers }) {
   const checkAdmin = async () => {
     //
     setLoading(true);
+    console.log("6");
     if (session) {
       const docRef = await doc(db, "admin", session?.user?.uid);
       const docSnap = await getDoc(docRef);
@@ -83,6 +92,7 @@ function admin({ providers }) {
     if (session) {
       //
       setLoading(true);
+      checkAdmin();
       const docRef = doc(db, "teachers", session?.user?.uid);
       const docSnap = await getDoc(docRef);
 
@@ -110,6 +120,10 @@ function admin({ providers }) {
 
     //
   };
+
+  useEffect(() => {
+    checkData();
+  }, [sessionStore]);
 
   if (loading) {
     return (
@@ -191,6 +205,7 @@ function admin({ providers }) {
       </div>
 
       <Info />
+      {onGuestprofile && <UserProfile uid={uidgest} />}
     </>
   );
 }

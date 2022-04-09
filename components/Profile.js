@@ -1,6 +1,6 @@
 import { ArrowLeftIcon } from "@heroicons/react/outline";
 import { DatabaseIcon, PencilAltIcon, PencilIcon } from "@heroicons/react/solid";
-import { deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useRef, useState } from "react";
 import { Triangle } from "react-loader-spinner";
@@ -14,6 +14,7 @@ import { thursdays } from "../atom/thursdays";
 import { tuesdays } from "../atom/tuesdays";
 import { wednesdays } from "../atom/wednesdays";
 import { db } from "../firebase";
+import InfoAL from "./InfoAL";
 import Smalldetails from "./Smalldetails";
 
 function Profile({ uid }) {
@@ -36,6 +37,8 @@ function Profile({ uid }) {
   const [loading, setLoading] = useState(false);
   const [update, setUpdate] = useState(false);
   const [form, setForm] = useRecoilState(checkForm);
+  const [absent, setAbsent] = useState([]);
+  const [replace, setReplace] = useState([]);
 
   let day = useRef(null);
   let time = useRef(null);
@@ -47,6 +50,13 @@ function Profile({ uid }) {
     setLoader(true);
     const docRef = doc(db, "teachers", uid);
     const docSnap = await getDoc(docRef);
+
+    await onSnapshot(collection(db, "teachers", uid, "absent"), (snapshot) => {
+      setAbsent(snapshot.docs);
+    });
+    await onSnapshot(collection(db, "teachers", uid, "replace"), (snapshot) => {
+      setReplace(snapshot.docs);
+    });
 
     if (docSnap.exists()) {
       setUser(docSnap.data());
@@ -287,6 +297,41 @@ function Profile({ uid }) {
                   );
                 })}
               </section>
+
+              <div className="w-[100%] border-0 border-white my-20  ">
+                {/*  */}
+
+                {absent.length > 0 && (
+                  <p className="text-orange-600 font-semibold font-serif text-[1.5rem] md:text-[1.8rem]  md:px-20 px-10 ">
+                    Absent Details <span className="text-orange-500">~ {absent.length}</span>
+                  </p>
+                )}
+
+                <div className="flex items-center flex-col md:flex-wrap md:flex-row  w-[100%] justify-between  mt-5 mb-2  max-h-[25rem] overflow-y-scroll scrollbar-hide ">
+                  {absent.map((datas, index) => (
+                    <div key={index} className=" flex items-center px-5  w-[100%] md:w-[48%] md:rounded-lg  py-3 my-0 mx-[1%]  ">
+                      <InfoAL absent={datas.data().Absent} replace={datas.data().Replace} date={datas.data().date} from={datas.data().from} to={datas.data().to} />
+                    </div>
+                  ))}
+                </div>
+                {/*  */}
+
+                {replace.length > 0 && (
+                  <p className="text-orange-600 font-semibold font-serif text-[1.5rem] md:text-[1.8rem]  md:px-20 px-10 mt-20 ">
+                    Replacement Details <span className="text-orange-500">~ {replace.length}</span>
+                  </p>
+                )}
+
+                <div className="flex items-center flex-col md:flex-wrap md:flex-row  w-[100%] justify-between  mt-5 mb-2  max-h-[25rem] overflow-y-scroll scrollbar-hide ">
+                  {replace.map((datas, index) => (
+                    <div key={index} className=" flex items-center px-5  w-[100%] md:w-[48%] md:rounded-lg  py-3 my-0 mx-[1%]  ">
+                      <InfoAL absent={datas.data().Absent} replace={datas.data().Replace} date={datas.data().date} from={datas.data().from} to={datas.data().to} />
+                    </div>
+                  ))}
+                </div>
+
+                {/*  */}
+              </div>
             </>
           ) : (
             <section className="w-[100%] my-20 md:px-20 px-10">

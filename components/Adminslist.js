@@ -3,10 +3,15 @@ import { MailIcon } from "@heroicons/react/solid";
 import { deleteDoc, doc } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import React from "react";
+import { useRecoilState } from "recoil";
+import { ShowUserProfile } from "../atom/ShowUserProfile";
+import { UidGuest } from "../atom/UidGuest";
 import { db } from "../firebase";
 
 function Adminslist({ UID, name, email, phone }) {
   const { data: session } = useSession();
+  const [uidgest, setuidguest] = useRecoilState(UidGuest);
+  const [onprofile, setOnProfile] = useRecoilState(ShowUserProfile);
 
   if (session?.user?.email === email) {
     return null;
@@ -16,6 +21,11 @@ function Adminslist({ UID, name, email, phone }) {
     await deleteDoc(doc(db, "admin", UID));
   };
 
+  function runguest() {
+    setuidguest(UID);
+    setOnProfile(true);
+  }
+
   return (
     <div className="w-[100%] md:w-[49%] px-5 my-2 md:px-3 py-4 flex items-center justify-between bg-gradient-to-r from-sky-700 to-indigo-900 rounded-xl ">
       <section className="flex flex-row flex-1 items-center">
@@ -23,9 +33,9 @@ function Adminslist({ UID, name, email, phone }) {
           <MailIcon className=" h-10 text-orange-600" />
         </div>
 
-        <section className="flex flex-col w-fit">
-          <p className="text-[1.7rem] md:text-[1.6rem]  font-semibold text-gray-300 truncate ">{email}</p>
-          <p className="text-[1.3rem] md:text-[1.2rem] italic font-semibold mt-1 text-gray-400">
+        <section className="flex flex-col w-fit" onClick={runguest}>
+          <p className="text-[1.7rem] md:text-[1.6rem]  font-semibold text-gray-300 truncate cursor-pointer ">{email}</p>
+          <p className="text-[1.3rem] md:text-[1.2rem] italic font-semibold mt-1 text-gray-400 cursor-pointer">
             {name} ~ {phone}
           </p>
         </section>

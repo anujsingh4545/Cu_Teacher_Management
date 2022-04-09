@@ -121,7 +121,7 @@ function Signin({ providers }) {
   return (
     <>
       <Header show="no" />
-      <div className=" max-w-5xl rounded-3xl   w-[95%]   shadow-md shadow-[#ffffffc0] mt-36 m-auto">
+      <div className=" max-w-5xl rounded-3xl   w-[95%]   mt-36 m-auto">
         {/*  */}
 
         <section className="flex w-[100%] text-center m-auto items-center bg-[#7c7c7c2b] rounded-t-3xl ">
@@ -145,7 +145,7 @@ function Signin({ providers }) {
           <p className="w-[100%] text-center text-slate-200 text-[1.3rem] md:text-[1.5rem] font-serif italic font-semibold mt-16 bg-[#11111180] py-7 ">To get access to site .., Please sign in || sign up first 🤍</p>
         </section>
 
-        <section className="flex flex-col items-center bg-[#7c7c7c2b] py-16 rouded-b-3xl ">
+        <section className="flex flex-col items-center bg-[#7c7c7c2b] py-16 rounded-b-3xl">
           {/*  */}
 
           <div className="m-auto  flex w-[80%] sm:w-[70%] items-center justify-center rounded-xl bg-[#7c7c7c2b] px-10 ">
@@ -163,9 +163,9 @@ function Signin({ providers }) {
           </p>
 
           {fpassword ? (
-            <input ref={setuserpassword} type="text" placeholder="Set your new password" className="outline-none px-10 mt-5 py-4 w-[80%] sm:w-[70%] text-[1.5rem]  rounded-xl text-slate-400 font-serif  bg-[#7c7c7c2b] " />
+            <input ref={setuserpassword} type="password" placeholder="Set your new password" className="outline-none px-10 mt-5 py-4 w-[80%] sm:w-[70%] text-[1.5rem]  rounded-xl text-slate-400 font-serif  bg-[#7c7c7c2b] " />
           ) : (
-            <input ref={userpassword} type="text" placeholder="Enter your password" className="outline-none px-10 mt-5 py-4 w-[80%] sm:w-[70%] text-[1.5rem]  rounded-xl text-slate-400 font-serif  bg-[#7c7c7c2b] " />
+            <input ref={userpassword} type="password" placeholder="Enter your password" className="outline-none px-10 mt-5 py-4 w-[80%] sm:w-[70%] text-[1.5rem]  rounded-xl text-slate-400 font-serif  bg-[#7c7c7c2b] " />
           )}
 
           {/*  */}

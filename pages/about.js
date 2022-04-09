@@ -26,6 +26,14 @@ function about({ providers }) {
   const [check, setCheck] = useRecoilState(checkAccept);
   const [onprofile, setOnProfile] = useRecoilState(ShowProfile);
   const [modal, setModal] = useRecoilState(ShowModal);
+  const [sessionStore, setSessionstore] = useState(0);
+
+  if (sessionStore === 0) {
+    if (session) {
+      setSessionstore(1);
+    }
+  } else {
+  }
 
   useEffect(async () => {
     let leadsFromLocalStorage = JSON.parse(localStorage.getItem("login"));
@@ -70,7 +78,7 @@ function about({ providers }) {
 
   useEffect(() => {
     checkData();
-  }, [db, session]);
+  }, [sessionStore]);
 
   if (loading) {
     return (

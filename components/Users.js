@@ -1,4 +1,4 @@
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
 import Userlist from "./Userlist";
@@ -7,7 +7,7 @@ function Users() {
   const [users, setUsers] = useState([]);
 
   useEffect(async () => {
-    const unsubscribe = await onSnapshot(query(collection(db, "teachers"), where("verified", "==", true)), (snapshot) => {
+    const unsubscribe = await onSnapshot(query(collection(db, "teachers"), orderBy("score", "desc"), where("verified", "==", true)), (snapshot) => {
       setUsers(snapshot.docs);
     });
     return unsubscribe;
