@@ -413,14 +413,14 @@ function absentee({ providers }) {
       await addDoc(collection(db, "teachers", absenterUID, "absent"), pushuserData);
       await addDoc(collection(db, "teachers", replacerUID, "replace"), pushuserData);
 
-      // emailjs.send("service_i864vc3", "template_6evbtve", { absentee: `${absenter}`, names: `${replacers}`, absent: `${absenter}`, dates: `${setTime}`, times: `${firstTime} - ${secondTime}`, receiver: `${replacerMail}`, senders: `${session?.user?.email}` }, "YhqKWKGrbZ4SjeZEX").then(
-      //   (result) => {
-      //     console.log(result.text);
-      //   },
-      //   (error) => {
-      //     console.log(error.text);
-      //   }
-      // );
+      emailjs.send("service_i864vc3", "template_6evbtve", { absentee: `${absenter}`, names: `${replacers}`, absent: `${absenter}`, dates: `${setTime}`, times: `${firstTime} - ${secondTime}`, receiver: `${replacerMail}`, senders: `${session?.user?.email}` }, "YhqKWKGrbZ4SjeZEX").then(
+        (result) => {
+          console.log(result.text);
+        },
+        (error) => {
+          console.log(error.text);
+        }
+      );
 
       absentee.current.value = "Pick a teacher";
       replacer.current.value = "Pick a teacher";
